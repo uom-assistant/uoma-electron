@@ -1,7 +1,7 @@
 {
   "name": "uom-electron",
   "version": "1.0.0",
-  "description": "UoM Assistant Electron client",
+  "description": "Electron client for UoM Assistant",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
