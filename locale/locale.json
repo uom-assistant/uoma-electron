@@ -1,0 +1,23 @@
+{
+    "en": {
+        "copy": "Copy",
+        "cut": "Cut",
+        "paste": "Paste",
+        "saveImageAs": "Save Image as…",
+        "lookUpSelection": "Look Up \"{selection}\"",
+        "copyLink": "Copy Link",
+        "copyImage": "Copy Image"
+    },
+    "zh": {
+        "copy": "复制",
+        "copy__macos": "拷贝",
+        "cut": "剪切",
+        "paste": "粘贴",
+        "saveImageAs": "图片另存为…",
+        "lookUpSelection": "查找 “{selection}”",
+        "copyLink": "复制链接",
+        "copyLink__macos": "拷贝链接",
+        "copyImage": "复制图片",
+        "copyImage__macos": "拷贝图片"
+    }
+}
