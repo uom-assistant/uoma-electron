@@ -4,7 +4,7 @@ const { is, enforceMacOSAppLocation } = require('electron-util')
 const path = require('path')
 const { evaluate } = require('mathjs')
 
-const handleApi = require('./handleApi')
+const { apiInit, handleApi } = require('./handleApi')
 
 const locales = require('./locale/locale.json')
 
@@ -416,6 +416,10 @@ app.whenReady().then(() => {
   if (is.macos) {
     enforceMacOSAppLocation()
   }
+
+  apiInit()
+
+  handleApi('/grade_attendance', { method: 'GET' })
 
   createWindow()
 
