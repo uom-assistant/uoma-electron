@@ -1,70 +1,90 @@
-const path = require('path')
-const fs = require('fs')
+// const path = require('path')
+// const fs = require('fs')
+
+const META = require('./uoma_meta')
+
+const gradeAttendance = require('./grade_attendance/grades')
+const checkAbility = require('./check_ability/check_ability')
+
+const endpoints = {
+  gradeAttendance,
+  checkAbility
+}
 
 const router = {}
 
-async function importJs (dir = null) {
-  if (!dir) {
-    dir = './'
+function trimSlashes (str) {
+  if (typeof str === 'string') {
+    let result = str
+    if (result.charAt(0) === '/') {
+      result = result.slice(1)
+    }
+
+    if (result.charAt(result.length - 1) === '/') {
+      result = result.slice(0, str.length - 1)
+    }
+
+    return result
+  } else {
+    return str
   }
-
-  fs.readdirSync(dir).forEach(function (file) {
-    const filePath = path.join(dir, file)
-
-    const stat = fs.statSync(filePath)
-    if (stat.isDirectory()) {
-      importJs(filePath)
-    }
-
-    if (stat.isFile()) {
-      if (file.match(/^.+\.js$/)) {
-        const { route } = require(filePath)
-        const { GET } = require(filePath)
-        const { POST } = require(filePath)
-
-        const routePath = route || dir
-
-        if (GET || POST) {
-          router[routePath] = {}
-        } else {
-          console.error(`No method on endpoint "${filePath}".`)
-          console.warn('Endpoint skipped.')
-          return
-        }
-
-        if (GET) {
-          router[routePath].GET = GET
-        }
-
-        if (POST) {
-          router[routePath].POST = POST
-        }
-      }
-    }
-  })
 }
 
 module.exports.apiInit = function () {
-  const endpointDir = 'endpoints'
-  const endpointsPath = path.join(__dirname, endpointDir)
-  importJs(endpointsPath)
+  for (const ep in endpoints) {
+    const endpoint = endpoints[ep]
+    router[trimSlashes(endpoint.route)] = endpoint.handle
+  }
 }
 
 module.exports.handleApi = async (url, options) => {
-  //
-  if (router[url]) {
-    if (options.method === 'GET' || options.method === 'POST') {
-      if (router[url][options.method]) {
-        if (options.method === 'GET') { return router[url][options.method](options.args) } else return router[url][options.method](options.data)
-      } else {
-        console.error(
-          `No such method (${options.method}) for endpoint "${url}".`
-        )
-      }
-    } else {
-      console.error(`Unsupported method: (${options.method})`)
+  return new Promise((resolve, reject) => {
+    let args = JSON.parse(options)
+    if (!args) {
+      args = options
+      console.warn('Request data is not a JSON object')
     }
-  } else {
-    console.error(`No such endpoint: "${url}"`)
-  }
+    let data = null
+    let error = null
+
+    url = trimSlashes(url)
+    if (router[url]) {
+      router[url](args).then(
+        response => {
+          data = JSON.stringify(response)
+
+          const res = {
+            success: true,
+            status: 200,
+            uomabVersion: META.version,
+            maintainence: META.maintaining,
+            data: data,
+            reason: error
+          }
+          resolve(res)
+        }
+      ).catch(err => {
+        error = err.message
+        const res = {
+          success: false,
+          status: 200,
+          uomabVersion: META.version,
+          maintainence: META.maintaining,
+          data: data,
+          reason: error
+        }
+        resolve(res)
+      })
+    } else {
+      const res = {
+        success: false,
+        status: 404,
+        uomabVersion: META.version,
+        maintainence: META.maintaining,
+        data: null,
+        reason: `UoMAB Error: no such endpoint: ${url}`
+      }
+      reject(res)
+    }
+  })
 }

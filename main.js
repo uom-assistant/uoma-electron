@@ -409,7 +409,7 @@ async function createWindow () {
       // Could be light, dark or system
       nativeTheme.themeSource = value
     }
-  }).setBackgroundColor('#FFFFFF').loadURL('https://uoma.axton.im')
+  }).setBackgroundColor('#FFFFFF').loadURL('http://127.0.0.1:8081')
 }
 
 app.whenReady().then(() => {
@@ -418,8 +418,6 @@ app.whenReady().then(() => {
   }
 
   apiInit()
-
-  handleApi('/grade_attendance', { method: 'GET' })
 
   createWindow()
 
